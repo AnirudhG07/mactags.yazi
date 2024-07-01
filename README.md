@@ -43,6 +43,16 @@ on = ["u", "a"]
 run = "plugin mactags --args=add"
 desc = "Add multiple colored tags to a file/folder"
 ```
+```toml
+on = ["u", "r"]
+run = "plugin mactags --args=remove"
+desc = "removes input tags from all tags to a file/folder"
+```
+```toml
+on = ["u", "d"]
+run = "plugin mactags --args=remove_all"
+desc = "removed all the tags attached to the file/folder"
+```
 
 ### Input
 The input format should be as follows:

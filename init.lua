@@ -130,13 +130,21 @@ local state = ya.sync(function()
 	return tostring(cx.active.current.cwd)
 end)
 
-local add_tags = function(generated_tags, file_path)
+local add_remove = function(args, generated_tags, file_path)
 
 	if generated_tags == "none" then
 		return
 	end
     local cwd = state()
-
+    local flag = ""
+    if args == "add" then
+        flag = "--add"
+    elseif args == "remove" then
+        flag = "--remove"
+    elseif args == "remove_all" then
+        generated_tags = "red green blue yellow orange purple grey home important work"
+        flag = "--remove"
+    end
 	-- Split the input string into individual tags
 	local tags = {}
 	for tag in generated_tags:gmatch("%S+") do
@@ -145,7 +153,7 @@ local add_tags = function(generated_tags, file_path)
 	end
 	-- Run the command separately for each tag
     for _, tag in ipairs(tags) do
-        local cmd_args = "tag --add " .. tag .. " " .. file_path
+        local cmd_args = "tag " .. flag .. " " .. tag .. " " .. file_path
         local child, err = Command(Shell_value)
 		:args({ "-c", cmd_args })
 		:cwd(cwd)
@@ -169,13 +177,15 @@ return {
 		end
 
         local file_path = "/add/absolute/path" -- yet to implement hovered
-
-		if action == "add" then
-			local col = get_tags()
-			if col == nil then
-				return
-			end
-			add_tags(col, file_path)
-		end
+        local col = ""
+        if action == "add" or action == "remove" then
+            local col = get_tags()
+            if col == nil then
+                return
+            end
+            add_remove(action, col, file_path)
+        elseif action == "remove_all" then
+            add_remove(action, col , file_path)
+        end
 	end
 }
