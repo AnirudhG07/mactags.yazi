@@ -66,7 +66,7 @@ desc = "remove all previous tags and set new ones"
 [[manager.prepend_keymap]]
 on = ["b", "f"]
 run = "plugin mactags --args=find_all"
-desc = "find all files with set color"
+desc = "find all files with input set of tags"
 ```
 
 ### Input
@@ -77,8 +77,9 @@ r g i w
 Red green i work
 ```
 Their should be no spelling mistakes in tags. You can use the mapped letter, full name with any casing you want.
+<br>This will add all these 4 tags to the file/folder.
 
-This will add all these 4 tags to the file/folder.
+For the `find_all` command, the input taken is converted to `green,red,important,work` and then passed to the `tag -f` command. This will only output the files that have all of these tags ATLEAST.
 
 ## TODO's
 - [X] - Write the add tags function for `tag -a`

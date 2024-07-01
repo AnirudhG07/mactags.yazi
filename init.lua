@@ -97,11 +97,8 @@ local assign_col = function(input_col)
     return col_string
 end
 
-local function get_tags(args)
+local function get_tags()
 	local title = "set tag color(s) as - 'r g i w'"
-	if args == "find_all" then
-		title = "set one color to preview all files of"
-	end
 	local col_set, event = ya.input({
 		realtime = false,
 		title = title,
@@ -117,7 +114,7 @@ local function get_tags(args)
 		local assigned_cols = assign_col(cols)
 		-- assigned_cols is a string "red green blue"
 		if assigned_cols == nil then
-			return get_tags(args)
+			return get_tags()
 		else
 			return assigned_cols
 		end
@@ -176,7 +173,8 @@ local add_remove = function(args, generated_tags, file_path)
     colset_notify("Successfully performed " .. args .. " tag operation.")
 end
 
-local function preview(args, generated_tags)
+local function preview(args, generated_tags, file_path)
+
 	local _permit = ya.hide()
 	if generated_tags == "none" then
 		return
@@ -185,7 +183,8 @@ local function preview(args, generated_tags)
     local cwd = state()
     local preview_cmd = " | fzf --preview '[[ -d {} ]] && eza --tree --color=always {} || bat -n --color=always {}'"
 	if args == "find_all" then
-		cmd_args = "tag -f " .. generated_tags .. preview_cmd
+        local new_tags = generated_tags:gsub(" ", ",")
+		cmd_args = "tag -f " .. new_tags .. preview_cmd
 	end
     local child, err = Command(Shell_value)
     :args({ "-c", cmd_args })
@@ -208,19 +207,19 @@ return {
 			return
 		end
 
-        local file_path = "//Volumes/Anirudh/Projects/yazi-plugins/mactags.yazi" -- yet to implement hovered
+        local file_path = "/add/absolute/path" -- yet to implement hovered
 		if file_path == "/add/absolute/path" then   -- to be removed(tbd)
 			colset_notify("Uhh, hovered file implementation not done. Oops!") -- tbd
 			return --tbd
 		end --tbd
         local col = ""
         if action == "add" or action == "remove" or action == "set" or action == "find_all" then
-            local col = get_tags(action)
+            local col = get_tags()
             if col == nil then
                 return
             end
 			if action == "find_all" then
-				preview(action, col)
+				preview(action, col, file_path)
 			else
             	add_remove(action, col, file_path)
 			end
