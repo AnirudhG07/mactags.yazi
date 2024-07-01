@@ -45,14 +45,19 @@ desc = "Add multiple colored tags to a file/folder"
 ```
 
 ### Input
-I am hoping to have addition of tags as-
+The input format should be as follows:
 ```
 r g i w 
+# OR
+Red green i work
 ```
+Their should be no spelling mistakes in tags. You can use the mapped letter, full name with any casing you want.
+
 This will add all these 4 tags to the file/folder.
 
 ## TODO's
 - [ ] - Write the add tags function for `tag -a`
+(Almost done, only hovered file_path is chosen, that is left)
 - [ ] - Write the remove tags function for `tag -r` (including remove all tags)
 - [ ] - Write the set tags function for `tag -s`
 - [ ] - Write the match tags function for `tag -m` h hopefully in fzf
