@@ -41,17 +41,22 @@ Add the following line to your `keymap.toml` file-
 ```toml
 on = ["u", "a"]
 run = "plugin mactags --args=add"
-desc = "Add multiple colored tags to a file/folder"
+desc = "Add multiple colored tags"
 ```
 ```toml
 on = ["u", "r"]
 run = "plugin mactags --args=remove"
-desc = "removes input tags from all tags to a file/folder"
+desc = "removes input tags from all tags"
 ```
 ```toml
 on = ["u", "d"]
 run = "plugin mactags --args=remove_all"
-desc = "removed all the tags attached to the file/folder"
+desc = "removed all the tags attached"
+```
+```toml
+on = ["u", "s"]
+run = "plugin mactags --args=set"
+desc = "remove all previous tags and set new ones"
 ```
 
 ### Input
@@ -66,10 +71,10 @@ Their should be no spelling mistakes in tags. You can use the mapped letter, ful
 This will add all these 4 tags to the file/folder.
 
 ## TODO's
-- [ ] - Write the add tags function for `tag -a`
-(Almost done, only hovered file_path is chosen, that is left)
-- [ ] - Write the remove tags function for `tag -r` (including remove all tags)
-- [ ] - Write the set tags function for `tag -s`
+- [X] - Write the add tags function for `tag -a`
+- [X] - Write the remove tags function for `tag -r` (including remove all tags)
+- [X] - Write the set tags function for `tag -s`
+The above are done except for file path handling(selecting hovered file)
 - [ ] - Write the match tags function for `tag -m` h hopefully in fzf
 - [ ] - Write the find tags function for `tag -f` - hopefully in fzf
 - [ ] - Have Tag symbol(colored) displayed in the manager (without calling the plugin)

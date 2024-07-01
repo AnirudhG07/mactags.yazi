@@ -144,6 +144,8 @@ local add_remove = function(args, generated_tags, file_path)
     elseif args == "remove_all" then
         generated_tags = "red green blue yellow orange purple grey home important work"
         flag = "--remove"
+    elseif args == "set" then
+        flag = "--set"
     end
 	-- Split the input string into individual tags
 	local tags = {}
@@ -167,6 +169,7 @@ local add_remove = function(args, generated_tags, file_path)
             return false
         end
     end
+    colset_notify("Successfully performed " .. args .. " tag operation.")
 end
 
 return {
@@ -177,8 +180,12 @@ return {
 		end
 
         local file_path = "/add/absolute/path" -- yet to implement hovered
+		if file_path == "/add/absolute/path" then   -- to be removed(tbd)
+			colset_notify("Uhh, hovered file implementation not done. Oops!") -- tbd
+			return --tbd
+		end --tbd
         local col = ""
-        if action == "add" or action == "remove" then
+        if action == "add" or action == "remove" or action == "set" then
             local col = get_tags()
             if col == nil then
                 return
