@@ -1,5 +1,3 @@
-local Tag_colors = { "r", "y", "o", "b", "g", " p", "a", "h", "i", "w" }
-
 local Color_mapping = {
 	r = "red",
 	b = "blue",
@@ -13,8 +11,25 @@ local Color_mapping = {
 	w = "work",
 }
 local Shell_value = os.getenv("SHELL"):match(".*/(.*)")
-local LINUX_TEMP_PATH = "/.config/yazi/plugins/mactags.yazi/tags_storage"
-local WINDOWS_TEMP_PATH = "\\yazi\\config\\plugins\\tags-persistence.yazi\\tags_storage"
+
+local function fail(s, ...)
+	ya.notify({ title = "Mactags", content = string.format(s, ...), timeout = 5, level = "error" })
+end
+
+local function error_msg_display(child, err)
+	if not child then
+		return fail("Spawn `mactag` failed with error code %s. Do you have `tag` installed?", err)
+	end
+
+	local output, err = child:wait_with_output()
+	if not output then
+		return fail("Cannot read `mactag` output, error code %s", err)
+	elseif not output.status.success and output.status.code ~= 130 then
+		return fail("`mactag` exited with error code %s", output.status.code)
+    else
+        return true
+    end
+end
 
 local function colset_notify(str)
 	ya.notify({
@@ -50,7 +65,7 @@ local assign_col = function(input_col)
 		end
 		return mapped_cols
 	end
-	
+
 	local mapped_cols = map_cols(input_col)
 	-- Map the input_col to single-character cols
 	if not mapped_cols then
@@ -86,7 +101,7 @@ local function get_tags()
 	local col_set, event = ya.input({
 		realtime = false,
 		title = "set tag color(s) as - 'r g i w'",
-		position = { "top-center", y = 3, w = 40 },
+		position = { "top-right", y = 3, w = 40 },
 	})
 	if event == 1 and col_set ~= "" then
 		-- Split the input string into a table of cols
@@ -100,22 +115,27 @@ local function get_tags()
 		if assigned_cols == nil then
 			return get_tags()
 		else
-			return event, assigned_cols
+			return assigned_cols
 		end
 
 	elseif event == 1 and col_set == "" then
 		local generate_col = auto_generate_tag()
-		return event, generate_col
+		return generate_col
 	else
-		return event, nil
+		return nil
 	end
 end
 
-local add_tags = function(event, generated_tags)
-    colset_notify("got flags as " .. generated_tags)
+local state = ya.sync(function()
+	return tostring(cx.active.current.cwd)
+end)
+
+local add_tags = function(generated_tags, file_path)
+
 	if generated_tags == "none" then
 		return
 	end
+    local cwd = state()
 
 	-- Split the input string into individual tags
 	local tags = {}
@@ -123,22 +143,22 @@ local add_tags = function(event, generated_tags)
         tag = Color_mapping[tag] or tag
 		table.insert(tags, tag)
 	end
-
 	-- Run the command separately for each tag
-	for _, tag in ipairs(tags) do
-        colset_notify("Assigning tag: " .. tag)
-        -- TILL HERE IT WORKS. file path is yet to be given
-        local cmd_args = "tag -a " .. tag .. file_path -- not given yet
-        if event == 1 then
-            ya.manager_emit("shell", {
-                Shell_value .. " -c " .. ya.quote(cmd_args .. "; exit", true),
-                block = true,
-                confirm = true,
-            })
-        end
-	end
+    for _, tag in ipairs(tags) do
+        local cmd_args = "tag --add " .. tag .. " " .. file_path
+        local child, err = Command(Shell_value)
+		:args({ "-c", cmd_args })
+		:cwd(cwd)
+		:stdin(Command.INHERIT)
+		:stdout(Command.PIPED)
+		:stderr(Command.INHERIT)
+		:spawn()
 
-	return true
+        local success = error_msg_display(child, err)
+        if not success then
+            return false
+        end
+    end
 end
 
 return {
@@ -148,12 +168,14 @@ return {
 			return
 		end
 
+        local file_path = "/add/absolute/path" -- yet to implement hovered
+
 		if action == "add" then
-			local event, col = get_tags()
+			local col = get_tags()
 			if col == nil then
 				return
 			end
-			add_tags(event, col)
+			add_tags(col, file_path)
 		end
-	end,
+	end
 }

@@ -19,7 +19,7 @@ tag - A tool for manipulating and querying file tags.
 ```
 
 ## Tag names
-MacOS Finder has various tags based on priorities and usages. I have mapped each tag wit a single corresponding letter. The tags are as follows:
+MacOS Finder has various tags based on priorities and usages. I have mapped each tag with a single corresponding letter. The tags are as follows:
 ```
 r = "red"
 b = "blue"
@@ -39,7 +39,7 @@ w = "work"
 Add the following line to your `keymap.toml` file-
 
 ```toml
-on = ["b", "a"]
+on = ["u", "a"]
 run = "plugin mactags --args=add"
 desc = "Add multiple colored tags to a file/folder"
 ```
