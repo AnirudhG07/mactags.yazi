@@ -39,24 +39,34 @@ w = "work"
 Add the following line to your `keymap.toml` file-
 
 ```toml
+[[manager.prepend_keymap]]
 on = ["u", "a"]
 run = "plugin mactags --args=add"
 desc = "Add multiple colored tags"
 ```
 ```toml
+[[manager.prepend_keymap]]
 on = ["u", "r"]
 run = "plugin mactags --args=remove"
 desc = "removes input tags from all tags"
 ```
 ```toml
+[[manager.prepend_keymap]]
 on = ["u", "d"]
 run = "plugin mactags --args=remove_all"
 desc = "removed all the tags attached"
 ```
 ```toml
+[[manager.prepend_keymap]]
 on = ["u", "s"]
 run = "plugin mactags --args=set"
 desc = "remove all previous tags and set new ones"
+```
+```toml
+[[manager.prepend_keymap]]
+on = ["b", "f"]
+run = "plugin mactags --args=find_all"
+desc = "find all files with set color"
 ```
 
 ### Input
@@ -75,6 +85,6 @@ This will add all these 4 tags to the file/folder.
 - [X] - Write the remove tags function for `tag -r` (including remove all tags)
 - [X] - Write the set tags function for `tag -s`
 The above are done except for file path handling(selecting hovered file)
-- [ ] - Write the match tags function for `tag -m` h hopefully in fzf
-- [ ] - Write the find tags function for `tag -f` - hopefully in fzf
+- [ ] - Write the match tags function for `tag -m` - hopefully in fzf
+- [X] - Write the find tags function for `tag -f` - hopefully in fzf
 - [ ] - Have Tag symbol(colored) displayed in the manager (without calling the plugin)
