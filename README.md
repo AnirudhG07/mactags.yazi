@@ -64,7 +64,7 @@ desc = "remove all previous tags and set new ones"
 ```
 ```toml
 [[manager.prepend_keymap]]
-on = ["b", "f"]
+on = ["u", "f"]
 run = "plugin mactags --args=find_all"
 desc = "find all files with input set of tags"
 ```
@@ -84,8 +84,11 @@ For the `find_all` command, the input taken is converted to `green,red,important
 ## TODO's
 - [X] - Write the add tags function for `tag -a`
 - [X] - Write the remove tags function for `tag -r` (including remove all tags)
-- [X] - Write the set tags function for `tag -s`
+- [X] - Write the set tags function for `tag -s`<br>
+
 The above are done except for file path handling(selecting hovered file)
+- [X] - Write the find tags function for `tag -f` - hopefully in fzf<br>
+
+The below too I am hoping to inculcate inside the manager. the -m tag only matches tags inside THAT directory. So I can filter in the manager without increasing too many keymaps.
 - [ ] - Write the match tags function for `tag -m` - hopefully in fzf
-- [X] - Write the find tags function for `tag -f` - hopefully in fzf
 - [ ] - Have Tag symbol(colored) displayed in the manager (without calling the plugin)
