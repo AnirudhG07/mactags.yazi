@@ -26,11 +26,24 @@ local Reverse_color_mapping = {
 
 local Shell_value = os.getenv("SHELL"):match(".*/(.*)")
 
+local state = ya.sync(function()
+	return tostring(cx.active.current.cwd)
+end)
+
 local function fail(s, ...)
 	ya.notify({ title = "Mactags", content = string.format(s, ...), timeout = 5, level = "error" })
 end
 
-local function error_msg_display(child, err)
+local function commad_runner(cmd_args)
+	local cwd = state()
+	local child, err = Command(Shell_value)
+		:args({ "-c", cmd_args })
+		:cwd(cwd)
+		:stdin(Command.INHERIT)
+		:stdout(Command.PIPED)
+		:stderr(Command.INHERIT)
+		:spawn()
+
 	if not child then
 		return fail("Spawn `mactag` failed with error code %s. Do you have `tag` installed?", err), child
 	end
@@ -141,16 +154,11 @@ local function get_tags()
 	end
 end
 
-local state = ya.sync(function()
-	return tostring(cx.active.current.cwd)
-end)
-
 local add_remove = function(args, generated_tags, file_path)
 
 	if generated_tags == "none" then
 		return
 	end
-    local cwd = state()
     local flag = ""
     if args == "add" then
         flag = "--add"
@@ -171,15 +179,7 @@ local add_remove = function(args, generated_tags, file_path)
 	-- Run the command separately for each tag
     for _, tag in ipairs(tags) do
         local cmd_args = "tag " .. flag .. " " .. tag .. " " .. file_path
-        local child, err = Command(Shell_value)
-		:args({ "-c", cmd_args })
-		:cwd(cwd)
-		:stdin(Command.INHERIT)
-		:stdout(Command.PIPED)
-		:stderr(Command.INHERIT)
-		:spawn()
-
-        local success, output = error_msg_display(child, err)
+        local success, output = commad_runner(cmd_args)
         if not success then
             return false
         end
@@ -194,22 +194,14 @@ local function preview(args, generated_tags, file_path)
 		return
 	end
 	local cmd_args = ""
-    local cwd = state()
     local preview_cmd = " | fzf --preview '[[ -d {} ]] && eza --tree --color=always {} || bat -n --color=always {}'"
+
 	if args == "find_all" then
         local new_tags = generated_tags:gsub(" ", ",")
 		cmd_args = "tag -f " .. new_tags .. preview_cmd
 	end
 
-	local child, err = Command(Shell_value)
-		:args({ "-c", cmd_args })
-		:cwd(cwd)
-		:stdin(Command.INHERIT)
-		:stdout(Command.PIPED)
-		:stderr(Command.INHERIT)
-		:spawn()
-
-		local success, output = error_msg_display(child, err)
+		local success, output = commad_runner(cmd_args)
         if not success then
             return false
         end
@@ -263,16 +255,8 @@ local function setup()
 	local files = selected_files()
 	-- assert, #files == 1, since it is hovered
 	local cmd_args = "tag -l " .. files[1]
-	local cwd = state()
-	local child, err = Command(Shell_value)
-		:args({ "-c", cmd_args })
-		:cwd(cwd)
-		:stdin(Command.INHERIT)
-		:stdout(Command.PIPED)
-		:stderr(Command.INHERIT)
-		:spawn()
 
-		local success, output = error_msg_display(child, err)
+		local success, output = commad_runner(cmd_args)
         if not success then
             return false
         end
@@ -282,10 +266,11 @@ local function setup()
     local tag_table = {}
 		-- assumes tags are correct since we are displaying now
     for tag in tagset:gmatch("([^,]+)") do
-        table.insert(tag_table, Reverse_color_mapping[tag])
+		local tag_char = Reverse_color_mapping[tag] -- to get the single character tag
+        table.insert(tag_table, tag_char)
     end
 	local tags = reorder_string(table.concat(tag_table, ""))
-    return tags
+	colset_notify("Tags" .. tags)
 end
 
 return {
