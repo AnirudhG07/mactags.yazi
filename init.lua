@@ -58,7 +58,7 @@ local function commad_runner(cmd_args)
     end
 end
 
-local function colset_notify(str)
+local function notify(str)
 	ya.notify({
 		title = "Mactags",
 		content = str,
@@ -70,14 +70,14 @@ end
 local auto_generate_tag = function()
 	-- if input_tag is empty,auto find a col to bind from begin Tag_colors
 	local auto_assign_tag = "none" -- default assign tag is NONE
-	colset_notify("You have not assigned any tag.")
+	notify("You have not assigned any tag.")
 
 	return auto_assign_tag
 end
 
 local assign_col = function(input_col)
 	-- input of this function is format {"g", "w", "i"}
-	-- Function to map input_col to single-character cols
+	-- Function to map input_col to full name tags
 	local function map_cols(input_col)
 		local mapped_cols = {}
 		for _, color in ipairs(input_col) do
@@ -86,7 +86,7 @@ local assign_col = function(input_col)
 			if col then
 				table.insert(mapped_cols, col)
 			else
-				colset_notify("assign fail, invalid color: " .. color)
+				notify("assign fail, invalid color: " .. color)
 				return nil
 			end
 		end
@@ -94,7 +94,7 @@ local assign_col = function(input_col)
 	end
 
 	local mapped_cols = map_cols(input_col)
-	-- Map the input_col to single-character cols
+
 	if not mapped_cols then
 		return nil
 	end
@@ -117,7 +117,7 @@ local assign_col = function(input_col)
     for col in col_string:gmatch("%S+") do
         i = i + 1
         if i > 10 then -- since max 10 tags are possible
-            colset_notify("Assign fail, col too long. Assigning all the tags.")
+            notify("Assign fail, col too long. Assigning all the tags.")
             return "red green blue yellow orange purple grey home important work"
         end
     end
@@ -184,7 +184,7 @@ local add_remove = function(args, generated_tags, file_path)
             return false
         end
     end
-    colset_notify("Successfully performed " .. args .. " tag operation.")
+    notify("Successfully performed " .. args .. " tag operation.")
 end
 
 local function preview(args, generated_tags, file_path)
@@ -270,7 +270,7 @@ local function setup()
         table.insert(tag_table, tag_char)
     end
 	local tags = reorder_string(table.concat(tag_table, ""))
-	colset_notify("Tags" .. tags)
+	notify("Tags" .. tags)
 end
 
 return {

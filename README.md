@@ -35,6 +35,12 @@ i = "important"
 w = "work"
 ```
 
+## Installation
+You can install it in MacOS using the following command:
+```bash
+git clone https://github.com/AnirudhG07/mactags.yazi ~/.config/yazi/plugins/mactags.yazi
+```
+
 ## Usage
 
 ### Keymaps
@@ -84,11 +90,11 @@ Their should be no spelling mistakes in tags. You can use the mapped letter, ful
 For the `find_all` command, the input taken is converted to `green,red,important,work` and then passed to the `tag -f` command. This will only output the files that have all of these tags ATLEAST.
 
 ## TODO's
+- [ ] - Have Tag symbol(colored) displayed in the status below beside permissions colored.
+- [?] - Write the match tags function for `tag -m` - hopefully in fzf (NOT REQUIRED, the -f flag is enough)
+
+### DONE
 - [X] - Write the add tags function for `tag -a`
 - [X] - Write the remove tags function for `tag -r` (including remove all tags)
 - [X] - Write the set tags function for `tag -s`<br>
 - [X] - Write the find tags function for `tag -f` - hopefully in fzf<br>
-
-The below too I am hoping to inculcate inside the manager. the -m tag only matches tags inside THAT directory. So I can filter in the manager without increasing too many keymaps.
-- [ ] - Write the match tags function for `tag -m` - hopefully in fzf
-- [ ] - Have Tag symbol(colored) displayed in the manager (without calling the plugin)
