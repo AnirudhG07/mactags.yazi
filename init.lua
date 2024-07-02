@@ -186,19 +186,45 @@ local function preview(args, generated_tags, file_path)
         local new_tags = generated_tags:gsub(" ", ",")
 		cmd_args = "tag -f " .. new_tags .. preview_cmd
 	end
-    local child, err = Command(Shell_value)
-    :args({ "-c", cmd_args })
-    :cwd(cwd)
-    :stdin(Command.INHERIT)
-    :stdout(Command.PIPED)
-    :stderr(Command.INHERIT)
-    :spawn()
 
-    local success = error_msg_display(child, err)
-    if not success then
-        return false
+	local child, err = Command(Shell_value)
+		:args({ "-c", cmd_args })
+		:cwd(cwd)
+		:stdin(Command.INHERIT)
+		:stdout(Command.PIPED)
+		:stderr(Command.INHERIT)
+		:spawn()
+
+	if not child then
+		return fail("Spawn `mactags` failed with error code %s. Do you have it installed?", err)
+	end
+
+	local output, err = child:wait_with_output()
+	if not output then
+		return fail("Cannot read `mactags` output, error code %s", err)
+	elseif not output.status.success and output.status.code ~= 130 then
+		return fail("`mactags` exited with error code %s", output.status.code)
+	end
+
+	local target = output.stdout:gsub("\n$", "")
+
+    local function getfilepath(inputstr, url)
+        if url == nil then
+            url = "%s"
+        end
+        local urlStart, urlEnd = string.find(inputstr, url)
+        if urlStart then
+            return string.sub(inputstr, 1, urlStart - 1)
+        end
+        return inputstr
     end
- end
+
+	local file_url = getfilepath(target, ":")
+
+	if file_url ~= "" then
+		ya.manager_emit(file_url:match("[/\\]$") and "cd" or "reveal", { file_url })
+	end
+end
 
 local selected_files = ya.sync(function()
 	local tab, paths = cx.active, {}
