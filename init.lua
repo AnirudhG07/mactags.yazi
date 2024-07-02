@@ -102,7 +102,7 @@ local function get_tags()
 	local col_set, event = ya.input({
 		realtime = false,
 		title = title,
-		position = { "top-right", y = 3, w = 40 },
+		position = { "top-center", y = 3, w = 62 },
 	})
 	if event == 1 and col_set ~= "" then
 		-- Split the input string into a table of cols
@@ -200,6 +200,17 @@ local function preview(args, generated_tags, file_path)
     end
  end
 
+local selected_files = ya.sync(function()
+	local tab, paths = cx.active, {}
+	for _, u in pairs(tab.selected) do
+		paths[#paths + 1] = tostring(u)
+	end
+	if #paths == 0 and tab.current.hovered then
+		paths[1] = tostring(tab.current.hovered.url)
+	end
+	return paths
+end)
+
 return {
 	entry = function(_, args)
 		local action = args[1]
@@ -207,24 +218,29 @@ return {
 			return
 		end
 
-        local file_path = "/add/absolute/path" -- yet to implement hovered
-		if file_path == "/add/absolute/path" then   -- to be removed(tbd)
-			colset_notify("Uhh, hovered file implementation not done. Oops!") -- tbd
-			return --tbd
-		end --tbd
+        local files = selected_files()
+		if #files == 0 then
+			return ya.notify({ title = "Mactags", content = "No file selected", level = "warn", timeout = 3 })
+		end
+        
         local col = ""
         if action == "add" or action == "remove" or action == "set" or action == "find_all" then
             local col = get_tags()
             if col == nil then
                 return
             end
-			if action == "find_all" then
-				preview(action, col, file_path)
-			else
-            	add_remove(action, col, file_path)
-			end
+            for _, file_path in ipairs(files) do
+                if action == "find_all" then
+                    preview(action, col, file_path)
+                else
+                    add_remove(action, col, file_path)
+                end
+            end
+
         elseif action == "remove_all" then
-            add_remove(action, col , file_path)
+            for _, file_path in ipairs(files) do
+                add_remove(action, col, file_path)
+            end
         end
 	end
 }

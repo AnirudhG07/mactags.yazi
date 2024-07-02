@@ -1,5 +1,7 @@
 # mactags.yazi
 Tagging files in yazi like MacOS.
+<br>
+You can select any number of files and tag them(or any other function) with multiple tags at once.
 
 ## Requirements
 - [yazi](https://github.com/sxyazi/yazi) Version >= 0.2.5
@@ -85,8 +87,6 @@ For the `find_all` command, the input taken is converted to `green,red,important
 - [X] - Write the add tags function for `tag -a`
 - [X] - Write the remove tags function for `tag -r` (including remove all tags)
 - [X] - Write the set tags function for `tag -s`<br>
-
-The above are done except for file path handling(selecting hovered file)
 - [X] - Write the find tags function for `tag -f` - hopefully in fzf<br>
 
 The below too I am hoping to inculcate inside the manager. the -m tag only matches tags inside THAT directory. So I can filter in the manager without increasing too many keymaps.
