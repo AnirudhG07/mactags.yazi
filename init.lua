@@ -10,6 +10,20 @@ local Color_mapping = {
 	i = "important",
 	w = "work",
 }
+
+local Reverse_color_mapping = {
+	red = "r",
+	blue = "b",
+	green = "g",
+	yellow = "y",
+	orange = "o",
+	purple = "p",
+	grey = "a",
+	home = "h",
+	important = "i",
+	work = "w",
+}
+
 local Shell_value = os.getenv("SHELL"):match(".*/(.*)")
 
 local function fail(s, ...)
@@ -18,16 +32,16 @@ end
 
 local function error_msg_display(child, err)
 	if not child then
-		return fail("Spawn `mactag` failed with error code %s. Do you have `tag` installed?", err)
+		return fail("Spawn `mactag` failed with error code %s. Do you have `tag` installed?", err), child
 	end
 
 	local output, err = child:wait_with_output()
 	if not output then
-		return fail("Cannot read `mactag` output, error code %s", err)
+		return fail("Cannot read `mactag` output, error code %s", err), output
 	elseif not output.status.success and output.status.code ~= 130 then
-		return fail("`mactag` exited with error code %s", output.status.code)
+		return fail("`mactag` exited with error code %s", output.status.code), output
     else
-        return true
+        return true, output
     end
 end
 
@@ -165,7 +179,7 @@ local add_remove = function(args, generated_tags, file_path)
 		:stderr(Command.INHERIT)
 		:spawn()
 
-        local success = error_msg_display(child, err)
+        local success, output = error_msg_display(child, err)
         if not success then
             return false
         end
@@ -195,16 +209,10 @@ local function preview(args, generated_tags, file_path)
 		:stderr(Command.INHERIT)
 		:spawn()
 
-	if not child then
-		return fail("Spawn `mactags` failed with error code %s. Do you have it installed?", err)
-	end
-
-	local output, err = child:wait_with_output()
-	if not output then
-		return fail("Cannot read `mactags` output, error code %s", err)
-	elseif not output.status.success and output.status.code ~= 130 then
-		return fail("`mactags` exited with error code %s", output.status.code)
-	end
+		local success, output = error_msg_display(child, err)
+        if not success then
+            return false
+        end
 
 	local target = output.stdout:gsub("\n$", "")
 
@@ -237,6 +245,49 @@ local selected_files = ya.sync(function()
 	return paths
 end)
 
+local function reorder_string(input)
+    local priority = {r = 1, b = 2, g = 3, y = 4, o = 5, p = 6, a = 7, h = 8, i = 9, w = 10}
+    local chars = {}
+    for i = 1, #input do
+        table.insert(chars, input:sub(i, i))
+    end
+
+    table.sort(chars, function(a, b)
+        return (priority[a] or 11) < (priority[b] or 11)
+    end)
+
+    return table.concat(chars)
+end
+
+local function setup()
+	local files = selected_files()
+	-- assert, #files == 1, since it is hovered
+	local cmd_args = "tag -l " .. files[1]
+	local cwd = state()
+	local child, err = Command(Shell_value)
+		:args({ "-c", cmd_args })
+		:cwd(cwd)
+		:stdin(Command.INHERIT)
+		:stdout(Command.PIPED)
+		:stderr(Command.INHERIT)
+		:spawn()
+
+		local success, output = error_msg_display(child, err)
+        if not success then
+            return false
+        end
+
+	local target = output.stdout:gsub("\n$", "")
+	local tagset = target:match("%s+(.*)"):gsub(",%s*", ",")
+    local tag_table = {}
+		-- assumes tags are correct since we are displaying now
+    for tag in tagset:gmatch("([^,]+)") do
+        table.insert(tag_table, Reverse_color_mapping[tag])
+    end
+	local tags = reorder_string(table.concat(tag_table, ""))
+    return tags
+end
+
 return {
 	entry = function(_, args)
 		local action = args[1]
@@ -267,6 +318,9 @@ return {
             for _, file_path in ipairs(files) do
                 add_remove(action, col, file_path)
             end
+		elseif action == "setup" then
+			setup()
         end
-	end
+	end,
+	setup = setup
 }
