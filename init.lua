@@ -1,14 +1,14 @@
 local Tag_mapping = {
-    r = { tag = "red", priority = 1 },
-    b = { tag = "blue", priority = 2 },
-    g = { tag = "green", priority = 3 },
-    y = { tag = "yellow", priority = 4 },
-    o = { tag = "orange", priority = 5 },
-    p = { tag = "purple", priority = 6 },
-    a = { tag = "grey", priority = 7 },
-    h = { tag = "home", priority = 8 },
-    i = { tag = "important", priority = 9 },
-    w = { tag = "work", priority = 10 }
+    r = { tag = "red", priority = 1, color = "red" },
+    b = { tag = "blue", priority = 2, color = "blue" },
+    g = { tag = "green", priority = 3, color = "green" },
+    y = { tag = "yellow", priority = 4, color = "yellow" },
+    o = { tag = "orange", priority = 5, color = "#FFA500" },
+    p = { tag = "purple", priority = 6, color = "#800080" },
+    a = { tag = "grey", priority = 7, color = "gray" },
+    h = { tag = "home", priority = 8, color = "magenta" },
+    i = { tag = "important", priority = 9, color = "black" },
+    w = { tag = "work", priority = 10, color = "cyan" }
 }
 
 local Self_enabled = false
@@ -271,10 +271,23 @@ local function setup()
 		return false
 	end
 
-	local target = output.stdout:gsub("\n$", "")
-	local tag_table = process_tags(target)
-	local tags = reorder_string(table.concat(tag_table, ""))
-	notify("Tags: " .. tags)
+    local target = output.stdout:gsub("\n$", "")
+    local tag_table = process_tags(target)
+    local tags = reorder_string(table.concat(tag_table, ""))
+
+    local function color_tag(tags)
+        -- tags is a string "rgiw"
+        local spans = ""
+        for i = 1, #tags do
+            local tag = tags:sub(i, i) -- Get each tag as a substring
+            local color = Tag_mapping[tag].color -- Fetch the corresponding color
+            spans = spans .. ui.Span("⬤"):fg(color) -- Concatenate the ui.Span
+        end
+        return spans
+    end
+
+    Linemode.children_add(color_tag(tags), 500)
+    return
 end
 
 return {
